@@ -1,23 +1,27 @@
 # -*- coding: utf-8 -*-
 from tkinter import *
 from tkinter import ttk
+import time
 import speedtest
 
 result_txt = None
+server_url = None
+ok_to_test = False
 
 
 class Application:
 
     def __init__(self):
-        global result_txt
-        import pprint
-        # pprint.pprint(self.server_name())
-        # pprint.pprint(self.server_url())
+        global result_txt, server_url
         self.window = Tk()
+
         result_txt = StringVar()
+        server_url = StringVar()
+        selected_server = StringVar()
+
         result_txt.set("Pressine testar e aguarde.")
 
-        self.window.geometry("480x320")
+        self.window.geometry("460x300")
         # self.window.attributes("-fullscreen", 1)
         self.window.title('Nova Net - RaspTeste')
         self.window.resizable(FALSE, FALSE)
@@ -32,21 +36,22 @@ class Application:
         self.action_frame = ttk.Frame(
             self.content, width=470, height=110).grid(column=0, row=3)
 
-        self.result_label = ttk.Label(
-            self.result_frame, textvariable=result_txt).grid(column=0, row=2)
 
         self.selection_label = ttk.Label(
             self.result_frame, text = "Selecione o servidor").grid(column=0, row=0)
 
-        self.selected_server = StringVar()
         self.selection_combo = ttk.Combobox(
-            self.result_frame, values=self.server_name(), textvariable=self.selected_server, justify="center")
+            self.result_frame, values=self.server_name(), textvariable=selected_server)
         self.selection_combo.grid(column=0, row=1)
-        # self.selection_combo.pack(fill='x', padx=5, pady=5)
         self.selection_combo.bind('<<ComboboxSelected>>', self.server_changed)
 
+        self.result_label = ttk.Label(
+            self.result_frame, textvariable=result_txt).grid(column=0, row=2)
+        
         self.button = ttk.Button(
-            self.action_frame, text='Testar', command=self.do_test).grid(column=0, row=3)
+            self.action_frame, text='Testar', command=self.do_test)
+        self.button.grid(column=0, row=3)
+        self.button.state(['disabled'] )
 
         self.window.mainloop()
 
@@ -73,9 +78,11 @@ class Application:
 
     def server_changed(self, event):
         server_name = self.selection_combo.get()
-        server_url = self.server_url(server_name)
-        print(server_url)
-        return server_url
+        server_url.set(self.server_url(server_name))
+        self.window.update_idletasks() 
+        self.button.state(['!disabled'])
+
+    
 
     def do_speedtest(self):
 
@@ -99,12 +106,10 @@ class Application:
         return self.results
 
     def do_test(self):
-        global result_txt
-
         result_txt.set("Aguarde...")
+        self.window.update_idletasks()
 
         results_dict = self.do_speedtest()
-
         if results_dict:
             result_txt.set("""
             Resultado
@@ -115,6 +120,7 @@ class Application:
             Download: {}Mb/s
                     """.format(results_dict['server'], results_dict['latency'], self.convert_to_mb(results_dict['upload']), self.convert_to_mb(results_dict['download'])))
 
+            self.window.update_idletasks()
 
 if __name__ == '__main__':
     Application()
