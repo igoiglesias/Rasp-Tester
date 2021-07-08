@@ -23,7 +23,7 @@ class Application:
 
         result_txt.set("Pressine testar e aguarde.")
 
-        self.window.geometry("460x300")
+        self.window.geometry("480x320")
         self.window.attributes("-fullscreen", 1)
         self.window.title('Nova Net - RaspTeste')
         self.window.resizable(FALSE, FALSE)
